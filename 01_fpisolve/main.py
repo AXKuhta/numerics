@@ -8,13 +8,15 @@ import numpy as np
 # Values at the diagonal must be large
 # Does not converge otherwise
 A = np.array([
-	[2, 1],
-	[3, 5]
+	[0.91, 1.04, 0.19],
+	[0.04, -.99, -.85],
+	[0.10, -.07, -.96]
 ])
 
-B = np.array([13, 51])
+B = np.array([-1.67, -3.73, -2.04])
 
-np.linalg.solve(A, B)
+ans = np.linalg.solve(A, B)
+print("Reference answer", ans)
 
 #
 # 2u + 1v = 20
@@ -23,7 +25,7 @@ np.linalg.solve(A, B)
 
 # u = (20 - 1v) / 2
 # v = (51 - 5v) / 3
-n = 2
+n = len(A)
 diag = np.diag(A)
 
 B = B / diag
@@ -32,7 +34,7 @@ A = A * (1 - np.eye(n))
 A = -A
 
 # Initial point
-x = np.array([0, 0])
+x = np.zeros(n)
 
 for i in range(30):
 	x = A @ x + B
