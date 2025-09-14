@@ -13,35 +13,60 @@ B = np.array([-0.98, 0.66, -.82])
 ans = np.linalg.solve(A, B)
 print("Reference answer", ans)
 
-def rearrange(A):
+# Ensure values at the diagonal are large
+def rearrange(A, B):
 	for i in range(len(A)):
 		idx = np.argmax(A[i:, i])
-		A[i], A[i+idx] = A[i+idx].copy(), A[i].copy()
-		B[i], B[i+idx] = B[i+idx].copy(), B[i].copy()
 
-rearrange(A)
+		# Swap rows
+		A[[i, i+idx]] = A[[i+idx, i]]
+		B[[i, i+idx]] = B[[i+idx, i]]
 
-#
-# Solving for unknowns
-#
-# 2u + 1v = 20
-# 3u + 5v = 51
-#
-# u = (20 - 1v) / 2
-# v = (51 - 5v) / 3
-#
+rearrange(A, B)
 
-n = len(A)
-diag = np.diag(A)
+def iterate(A, B, iters=30, eps=0.0001):
+	#
+	# Solving for unknowns
+	#
+	# 2u + 1v = 20
+	# 3u + 5v = 51
+	#
+	# u = (20 - 1v) / 2
+	# v = (51 - 5v) / 3
+	#
 
-B = B / diag
-A = A / diag[:, None] # Divide in dim 0
-A = A * (1 - np.eye(n))
-A = -A
+	n = len(A)
+	diag = np.diag(A)
 
-# Initial point
-x = np.zeros(n)
+	B = B / diag
+	A = A / diag[:, None] # Divide in dim 0
+	A = A * (1 - np.eye(n))
+	A = -A
 
-for i in range(30):
-	x = A @ x + B
-	print(x)
+	alpha = np.linalg.norm(A)
+	print("Alpha:", alpha)
+
+	#
+	# Early stop threshold
+	#
+	stop = eps * (1 - alpha)/alpha
+
+	# Initial point
+	x = np.zeros(n)
+
+	log = [x]
+
+	for i in range(iters):
+		x = A @ x + B
+		log.append(x)
+		print(x)
+
+		dist = np.linalg.norm(log[-2] - log[-1])
+
+		if dist <= stop:
+			print("Complete")
+			return
+
+	print("Timeout")
+
+iterate(A, B)
