@@ -1,22 +1,5 @@
 import numpy as np
 
-def disp_vectors(Q):
-	from mpl_toolkits.mplot3d import Axes3D
-	import matplotlib.pyplot as plt
-
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
-
-	ax.set_xlim([-1, 1])
-	ax.set_ylim([-1, 1])
-	ax.set_zlim([-1, 1])
-
-	ax.quiver(0,0,0, *Q[0], arrow_length_ratio=0.1)
-	ax.quiver(0,0,0, *Q[1], arrow_length_ratio=0.1)
-	ax.quiver(0,0,0, *Q[2], arrow_length_ratio=0.1)
-
-	plt.show()
-
 np.set_printoptions(suppress=True)
 
 A = np.array([
@@ -59,7 +42,7 @@ print("Reference answer", ans)
 
 Q, R = np.linalg.qr(A)
 ans = np.linalg.inv(R) @ Q.T @ B
-print(ans)
+print("Reference answer:", ans)
 
 # Orthogonalization
 # https://en.wikipedia.org/wiki/QR_decomposition
@@ -80,5 +63,23 @@ for k in range(k_):
 	Q.T[k] /= np.linalg.norm(Q.T[k])
 	R.T[k][:k+1] = Q.T[:k+1] @ A.T[k]
 
-ans = np.linalg.inv(R) @ Q.T @ B
-print(ans)
+# Back substitution
+# https://en.wikipedia.org/wiki/Triangular_matrix
+x = np.zeros(3)
+QTB = Q.T @ B
+
+for i in reversed(range(len(R))):
+	x[i] = (QTB - R@x)[i]/R[i, i]
+
+print("Answer", x)
+
+# Third method
+x3 = Q.T[2] @ B / (Q.T[2] @ A.T[2])
+B_ = B - A.T[2] * x3
+
+x2 = Q.T[1] @ B_ / (Q.T[1] @ A.T[1])
+B__ = B_ - A.T[1] * x2
+
+x1 = Q.T[0] @ B__ / (Q.T[0] @ A.T[0])
+
+print("Answer", np.array([x1, x2, x3]))
