@@ -50,6 +50,5 @@ def test():
 	x = np.array([1.0, 2.0, 3.0])
 	y = x**2
 
-	# Lagrangian can fit x**2 perfectly
 	print("Ground truth:", 1.1 ** 2)
 	print("Newtonian  :", newtonian_fwd(x, y, 1.1))
